@@ -8,15 +8,17 @@ using System;
 public class MySQLRaceStatsDAO : RaceStatsDAO
 {
     // Datos de conexión
-    [SerializeField] string server = "localhost";
+    [SerializeField] string server = "127.0.0.1";
     [SerializeField] string database = "racer";
-    [SerializeField] string user = "user"; 
-    [SerializeField] string password = ""; 
+    [SerializeField] string user = "root"; 
+    [SerializeField] string password = "";
+    [SerializeField] int port = 3307;
     private MySqlConnection connection;
 
     public MySQLRaceStatsDAO()
     {
-        string connectionString = $"Server={server};Database={database};User ID={user};Password={password};SslMode=none;";
+        string connectionString = "Server=127.0.0.1; Port=3307; Database=racer; Uid=root; Pwd=;";
+        Debug.Log(connectionString);    
         connection = new MySqlConnection(connectionString);
 
         connection.Open();
@@ -28,7 +30,7 @@ public class MySQLRaceStatsDAO : RaceStatsDAO
         RaceStats raceStats = new RaceStats();
         raceStats.gates = new List<GateStat>();
 
-        string query = "SELECT startTime FROM races WHERE id = @id";
+        string query = "SELECT start_time FROM race_stats WHERE id = @id";
         MySqlCommand cmd = new MySqlCommand(query, connection);
         cmd.Parameters.AddWithValue("@id", id);
 
@@ -36,7 +38,7 @@ public class MySQLRaceStatsDAO : RaceStatsDAO
         {
             if (reader.Read())
             {
-                raceStats.startTime = reader.GetDateTime("startTime");
+                raceStats.startTime = reader.GetDateTime("start_time");
             }
             else
             {
@@ -70,12 +72,12 @@ public class MySQLRaceStatsDAO : RaceStatsDAO
     {
         string raceId = Guid.NewGuid().ToString();
 
-        string query = "INSERT INTO races (id, startTime) VALUES (@id, @startTime)";
+        string query = "INSERT INTO race_stats (id, start_time) VALUES (@id, @start_time)";
         MySqlCommand cmd = new MySqlCommand(query, connection);
         cmd.Parameters.AddWithValue("@id", raceId);
-        cmd.Parameters.AddWithValue("@startTime", s.startTime);
+        cmd.Parameters.AddWithValue("@start_time", s.startTime);
         cmd.ExecuteNonQuery();
-
+        Debug.Log("llego aqui");
         for (int i = 0; i < s.gates.Count; i++)
         {
             GateStat gate = s.gates[i];
@@ -87,7 +89,7 @@ public class MySQLRaceStatsDAO : RaceStatsDAO
             cmd.Parameters.AddWithValue("@speed", gate.speed);
             cmd.ExecuteNonQuery();
         }
-
+        Debug.Log("llego aqui2");
         return raceId;
     }
 }
